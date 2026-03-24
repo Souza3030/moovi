@@ -95,8 +95,8 @@
       </div>
      </div>
      <div class="fade-in">
-      <h1 id="greeting-text" class="text-3xl md:text-4xl font-800 mb-1" style="color: #fff;">Bom dia! </h1>
-      <p class="text-sm" style="color: #888;">Vamos alcançar seus objetivos hoje?</p>
+      <h1 id="greeting-text" class="text-3xl md:text-4xl font-800 mb-1" style="color: #fff;">Bom dia, <span id="user-name-greeting">Usuário</span>! 🌟</h1>
+      <p id="greeting-desc" class="text-sm" style="color: #888;">Vamos alcançar seus objetivos hoje?</p>
      </div><!-- QUICK STATS -->
      <div class="grid grid-cols-3 gap-3 mt-6 fade-in fade-in-delay-1">
       <div class="stat-box dark-glass rounded-2xl p-4 text-center">
@@ -209,21 +209,21 @@
     // ========= TRANSLATIONS =========
     const translations = {
       pt: {
-        greeting: 'Bom dia! ',
+        greeting: 'Bom dia! 🌟',
         greeting_desc: 'Vamos alcançar seus objetivos hoje?',
         habits_title: 'Seus Hábitos',
         recommendations_title: 'Recomendações para Você',
         progress_title: 'Seu Progresso'
       },
       en: {
-        greeting: 'Good morning! ',
+        greeting: 'Good morning! 🌟',
         greeting_desc: 'Let\'s reach your goals today?',
         habits_title: 'Your Habits',
         recommendations_title: 'Recommendations for You',
         progress_title: 'Your Progress'
       },
       es: {
-        greeting: '¡Buenos días! ',
+        greeting: '¡Buenos días! 🌟',
         greeting_desc: '¿Vamos a alcanzar tus objetivos hoy?',
         habits_title: 'Tus Hábitos',
         recommendations_title: 'Recomendaciones para Ti',
@@ -235,6 +235,19 @@
     let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
     let allHabits = [];
     let allUsers = JSON.parse(localStorage.getItem('allUsers')) || [];
+
+    // ========= GREETING UPDATE =========
+    function updateGreeting() {
+      const name = currentUser?.name || 'Usuário';
+      document.getElementById('user-name-greeting').textContent = name;
+      
+      const hour = new Date().getHours();
+      let greeting = 'Bom dia';
+      if (hour >= 12 && hour < 18) greeting = 'Boa tarde';
+      if (hour >= 18) greeting = 'Boa noite';
+      
+      document.getElementById('greeting-text').innerHTML = `${greeting}, <span id="user-name-greeting">${name}</span>! 🌟`;
+    }
 
     // ========= INIT =========
     const dataHandler = {
@@ -255,6 +268,7 @@
       
       if (currentUser) {
         showApp();
+        updateGreeting();
         loadUserProfile();
       } else {
         showLogin();
@@ -316,6 +330,7 @@
         currentUser = user;
         localStorage.setItem('currentUser', JSON.stringify(user));
         showApp();
+        updateGreeting();
         loadUserProfile();
       } else {
         showToast('Email ou senha incorretos!', true);
@@ -350,6 +365,7 @@
       document.getElementById('form-register').reset();
       
       showApp();
+      updateGreeting();
       loadUserProfile();
       showToast('Conta criada com sucesso! 🎉');
     }
@@ -463,11 +479,15 @@
     function updateMetrics() {
       const total = allHabits.length;
       const active = allHabits.filter(h => !h.completed).length;
-      const completed = allHabits.filter(h => h.completed).length;
+      const today = allHabits.filter(h => {
+        const created = new Date(h.created_at);
+        const now = new Date();
+        return created.toDateString() === now.toDateString() && h.completed;
+      }).length;
 
       document.getElementById('stat-total').textContent = total;
       document.getElementById('stat-active').textContent = active;
-      document.getElementById('stat-completed').textContent = completed;
+      document.getElementById('stat-completed').textContent = today;
     }
 
     // ========= RENDER =========
@@ -480,12 +500,12 @@
         return;
       }
 
-      const icons = { saude: '', exercicio: '', meditacao: '', leitura: '', produtividade: '', social: '', hobby: '' };
+      const icons = { saude: '🏥', exercicio: '💪', meditacao: '🧘', leitura: '📚', produtividade: '⚙️', social: '👥', hobby: '🎨' };
       const existingMap = new Map([...container.children].map(el => [el.dataset.habitId, el]));
 
       allHabits.forEach((habit) => {
         const id = habit.__backendId;
-        const icon = icons[habit.category] || '';
+        const icon = icons[habit.category] || '⭐';
 
         if (existingMap.has(id)) {
           const el = existingMap.get(id);
@@ -665,6 +685,7 @@
         allUsers = allUsers.map(u => u.email === currentUser.email ? currentUser : u);
         localStorage.setItem('allUsers', JSON.stringify(allUsers));
 
+        updateGreeting();
         closeModal('modal-settings');
         showToast('Perfil atualizado! ✅');
       }
@@ -709,5 +730,5 @@
 
     lucide.createIcons();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e1747094053f62c',t:'MTc3NDM3MjEwMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e1758c6d7c8f62c',t:'MTc3NDM3MjgyOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
