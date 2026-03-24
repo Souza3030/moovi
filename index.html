@@ -1,0 +1,713 @@
+<!doctype html>
+<html lang="pt" class="h-full" id="html-root">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Moovi Wellness</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Poppins', sans-serif; }
+    html, body { height: 100%; margin: 0; }
+    
+    .fade-in { animation: fadeIn 0.6s ease forwards; opacity: 0; }
+    .fade-in-delay-1 { animation-delay: 0.1s; }
+    .fade-in-delay-2 { animation-delay: 0.2s; }
+    .fade-in-delay-3 { animation-delay: 0.3s; }
+    @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } from { opacity: 0; transform: translateY(16px); } }
+    
+    @keyframes slideInRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+    .slide-in { animation: slideInRight 0.5s ease forwards; }
+    
+    @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 20px rgba(45, 106, 250, 0.3); } 50% { box-shadow: 0 0 40px rgba(45, 106, 250, 0.6); } }
+    .glow { animation: pulse-glow 3s ease infinite; }
+    
+    .activity-card { transition: all 0.3s ease; cursor: pointer; }
+    .activity-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(45, 106, 250, 0.25); }
+    .activity-card.completed { opacity: 0.7; }
+    
+    .routine-btn { transition: all 0.2s ease; }
+    .routine-btn:hover { transform: scale(1.05); }
+    
+    .progress-bar { transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    
+    .stat-box { backdrop-filter: blur(10px); }
+    
+    .toast-enter { animation: toastSlide 0.3s ease forwards; }
+    .toast-exit { animation: toastSlideOut 0.3s ease forwards; }
+    @keyframes toastSlide { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes toastSlideOut { from { opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+    
+    input:focus, select:focus { outline: none; box-shadow: 0 0 0 3px rgba(45, 106, 250, 0.2); border-color: #2D6AFA; }
+    
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #444; }
+    
+    .dark-glass { background: rgba(30, 30, 30, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+    .primary-blue { background: linear-gradient(135deg, #2D6AFA 0%, #1E4DC4 100%); }
+    .gradient-accent { background: linear-gradient(135deg, #2D6AFA 0%, #FF6B6B 100%); }
+    
+    .hero-gradient { background: linear-gradient(180deg, rgba(45, 106, 250, 0.1) 0%, rgba(45, 106, 250, 0) 100%); }
+    
+    .mobile-nav { display: none; }
+    @media (max-width: 768px) {
+      .mobile-nav { display: flex !important; }
+    }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+ </head>
+ <body class="h-full" style="background: #121212; color: #E0E0E0;"><!-- LOGIN SCREEN -->
+  <div id="login-screen" class="h-full w-full flex flex-col items-center justify-center px-4" style="background: #121212;">
+   <div class="w-full max-w-sm">
+    <div class="text-center mb-8 fade-in">
+     <div class="w-16 h-16 rounded-3xl primary-blue flex items-center justify-center mx-auto mb-4">
+      <i data-lucide="activity" style="width:32px;height:32px;color:#fff;"></i>
+     </div>
+     <h1 class="text-3xl font-800 mb-2" style="color: #fff;">Moovi</h1>
+     <p class="text-sm" style="color: #888;">Seu companheiro de bem-estar</p>
+    </div>
+    <div class="dark-glass rounded-3xl p-6 fade-in fade-in-delay-1">
+     <div class="flex gap-2 mb-6"><button onclick="switchLoginMode('login')" id="btn-login-mode" class="flex-1 py-2 rounded-lg font-semibold text-sm primary-blue text-white">Entrar</button> <button onclick="switchLoginMode('register')" id="btn-register-mode" class="flex-1 py-2 rounded-lg font-semibold text-sm dark-glass text-gray-400">Registrar</button>
+     </div><!-- LOGIN FORM -->
+     <form id="form-login" onsubmit="return false;"><label for="login-email" class="block text-xs font-semibold mb-2" style="color: #888;">Email</label> <input id="login-email" type="email" class="w-full px-4 py-3 rounded-xl border border-gray-600 text-sm mb-4" style="background: #1a1a1a; color: #fff;" placeholder="seu@email.com" required> <label for="login-password" class="block text-xs font-semibold mb-2" style="color: #888;">Senha</label> <input id="login-password" type="password" class="w-full px-4 py-3 rounded-xl border border-gray-600 text-sm mb-6" style="background: #1a1a1a; color: #fff;" placeholder="••••••" required> <button type="button" onclick="handleLogin()" id="btn-login" class="w-full px-4 py-3 rounded-xl text-sm font-semibold primary-blue text-white hover:shadow-lg hover:shadow-blue-500/50 transition">Entrar</button>
+     </form><!-- REGISTER FORM -->
+     <form id="form-register" style="display:none;" onsubmit="return false;"><label for="register-name" class="block text-xs font-semibold mb-2" style="color: #888;">Nome</label> <input id="register-name" type="text" class="w-full px-4 py-3 rounded-xl border border-gray-600 text-sm mb-4" style="background: #1a1a1a; color: #fff;" placeholder="Seu nome" required> <label for="register-email" class="block text-xs font-semibold mb-2" style="color: #888;">Email</label> <input id="register-email" type="email" class="w-full px-4 py-3 rounded-xl border border-gray-600 text-sm mb-4" style="background: #1a1a1a; color: #fff;" placeholder="seu@email.com" required> <label for="register-password" class="block text-xs font-semibold mb-2" style="color: #888;">Senha</label> <input id="register-password" type="password" class="w-full px-4 py-3 rounded-xl border border-gray-600 text-sm mb-4" style="background: #1a1a1a; color: #fff;" placeholder="••••••" required> <label for="register-age" class="block text-xs font-semibold mb-2" style="color: #888;">Idade</label> <input id="register-age" type="number" class="w-full px-4 py-3 rounded-xl border border-gray-600 text-sm mb-4" style="background: #1a1a1a; color: #fff;" placeholder="25" min="13" required> <label for="register-goal" class="block text-xs font-semibold mb-2" style="color: #888;">Objetivo</label> <select id="register-goal" class="w-full px-4 py-3 rounded-xl border border-gray-600 text-sm mb-6" style="background: #1a1a1a; color: #fff;" required> <option value="">Selecione um objetivo</option> <option value="emagrecer">Emagrecer</option> <option value="ganhar-massa">Ganhar Massa Muscular</option> <option value="saude">Melhorar Saúde</option> <option value="resistencia">Aumentar Resistência</option> <option value="flexibilidade">Melhorar Flexibilidade</option> </select> <button type="button" onclick="handleRegister()" id="btn-register" class="w-full px-4 py-3 rounded-xl text-sm font-semibold primary-blue text-white hover:shadow-lg hover:shadow-blue-500/50 transition">Criar Conta</button>
+     </form>
+    </div>
+   </div>
+  </div><!-- MAIN APP -->
+  <div id="app-root" class="h-full w-full flex flex-col overflow-auto" style="background: #121212; display:none;"><!-- HERO SECTION -->
+   <section class="w-full px-4 pt-8 pb-6 border-b border-gray-800" style="background: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%);">
+    <div class="max-w-6xl mx-auto">
+     <div class="flex items-center justify-between mb-6">
+      <div class="flex items-center gap-2.5">
+       <div class="w-10 h-10 rounded-2xl primary-blue flex items-center justify-center fade-in">
+        <i data-lucide="activity" style="width:24px;height:24px;color:#fff;"></i>
+       </div><span class="text-2xl font-bold tracking-tight" style="color: #fff;">Moovi</span>
+      </div>
+      <div class="flex items-center gap-2"><select id="language-select" onchange="changeLanguage(this.value)" class="px-3 py-2 rounded-lg border border-gray-700 text-sm dark-glass" style="color: #E0E0E0; background: #1a1a1a;"> <option value="pt">🇧🇷 PT</option> <option value="en">🇺🇸 EN</option> <option value="es">🇪🇸 ES</option> </select> <button onclick="openSettings()" class="w-10 h-10 rounded-xl dark-glass flex items-center justify-center hover:bg-gray-700 transition"> <i data-lucide="settings" style="width:18px;height:18px;"></i> </button>
+      </div>
+     </div>
+     <div class="fade-in">
+      <h1 id="greeting-text" class="text-3xl md:text-4xl font-800 mb-1" style="color: #fff;">Bom dia! </h1>
+      <p class="text-sm" style="color: #888;">Vamos alcançar seus objetivos hoje?</p>
+     </div><!-- QUICK STATS -->
+     <div class="grid grid-cols-3 gap-3 mt-6 fade-in fade-in-delay-1">
+      <div class="stat-box dark-glass rounded-2xl p-4 text-center">
+       <div class="text-2xl font-bold" style="color: #2D6AFA;" id="stat-total">
+        0
+       </div>
+       <div class="text-xs mt-1" style="color: #888;">
+        Hábitos
+       </div>
+      </div>
+      <div class="stat-box dark-glass rounded-2xl p-4 text-center">
+       <div class="text-2xl font-bold" style="color: #FF6B6B;" id="stat-active">
+        0
+       </div>
+       <div class="text-xs mt-1" style="color: #888;">
+        Ativos
+       </div>
+      </div>
+      <div class="stat-box dark-glass rounded-2xl p-4 text-center">
+       <div class="text-2xl font-bold" style="color: #FFD93D;" id="stat-completed">
+        0
+       </div>
+       <div class="text-xs mt-1" style="color: #888;">
+        Completados
+       </div>
+      </div>
+     </div>
+    </div>
+   </section><!-- HABITS SECTION -->
+   <section class="w-full px-4 py-8 border-b border-gray-800">
+    <div class="max-w-6xl mx-auto">
+     <div class="flex items-center justify-between mb-5">
+      <h2 id="habits-title" class="text-xl font-bold" style="color: #fff;">Seus Hábitos</h2><button onclick="openCreateHabit()" class="px-4 py-2 rounded-xl primary-blue text-sm font-semibold text-white flex items-center gap-2 hover:shadow-lg hover:shadow-blue-500/50 transition"> <i data-lucide="plus" style="width:14px;height:14px;"></i> Novo Hábito </button>
+     </div>
+     <div id="habits-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 fade-in">
+      <div class="dark-glass rounded-2xl p-6 text-center col-span-full">
+       <i data-lucide="inbox" style="width:32px;height:32px; margin: 0 auto 8px;" class="opacity-40"></i>
+       <p class="text-sm" style="color: #888;">Nenhum hábito criado ainda</p>
+       <p class="text-xs mt-2" style="color: #666;">Clique em "Novo Hábito" para começar</p>
+      </div>
+     </div>
+    </div>
+   </section><!-- RECOMMENDATIONS SECTION -->
+   <section class="w-full px-4 py-8 border-b border-gray-800">
+    <div class="max-w-6xl mx-auto">
+     <h2 id="recommendations-title" class="text-xl font-bold mb-5" style="color: #fff;">Recomendações para Você</h2>
+     <div id="recommendations-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 fade-in">
+      <div class="dark-glass rounded-2xl p-6 text-center col-span-full">
+       <i data-lucide="lightbulb" style="width:32px;height:32px; margin: 0 auto 8px;" class="opacity-40"></i>
+       <p class="text-sm" style="color: #888;">Crie seus primeiros hábitos</p>
+       <p class="text-xs mt-2" style="color: #666;">e veja recomendações personalizadas</p>
+      </div>
+     </div>
+    </div>
+   </section><!-- PROGRESS SECTION -->
+   <section class="w-full px-4 py-8 pb-24 md:pb-8">
+    <div class="max-w-6xl mx-auto">
+     <h2 id="progress-title" class="text-xl font-bold mb-5" style="color: #fff;">Seu Progresso</h2>
+     <div id="progress-list" class="space-y-3 fade-in">
+      <div class="dark-glass rounded-2xl p-4 text-center text-gray-400 col-span-full">
+       <i data-lucide="inbox" style="width:32px;height:32px; margin: 0 auto 8px;" class="opacity-40"></i>
+       <p class="text-sm">Nenhum registro ainda</p>
+       <p class="text-xs mt-1">Marque seus hábitos como completados</p>
+      </div>
+     </div>
+    </div>
+   </section><!-- MOBILE FAB --> <button onclick="openCreateHabit()" class="fixed bottom-20 right-4 w-14 h-14 rounded-full primary-blue flex items-center justify-center text-white shadow-xl hover:shadow-2xl transition md:hidden" style="box-shadow: 0 8px 30px rgba(45, 106, 250, 0.4);"> <i data-lucide="plus" style="width:24px;height:24px;"></i> </button> <!-- MOBILE BOTTOM NAV -->
+   <nav class="mobile-nav fixed bottom-0 left-0 right-0 dark-glass border-t border-gray-700 justify-around py-2 px-2 z-50"><button onclick="switchTab('habits')" id="tab-habits-btn" class="flex flex-col items-center gap-1 px-3 py-2 rounded-lg text-blue-500"> <i data-lucide="activity" style="width:20px;height:20px;"></i> <span class="text-[10px] font-semibold">Hábitos</span> </button> <button onclick="switchTab('recommendations')" id="tab-recommendations-btn" class="flex flex-col items-center gap-1 px-3 py-2 rounded-lg text-gray-400"> <i data-lucide="lightbulb" style="width:20px;height:20px;"></i> <span class="text-[10px] font-semibold">Recomendações</span> </button> <button onclick="switchTab('progress')" id="tab-progress-btn" class="flex flex-col items-center gap-1 px-3 py-2 rounded-lg text-gray-400"> <i data-lucide="bar-chart-3" style="width:20px;height:20px;"></i> <span class="text-[10px] font-semibold">Progresso</span> </button>
+   </nav><!-- CREATE HABIT MODAL -->
+   <div id="modal-create-habit" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display:none; background:rgba(0,0,0,0.7); backdrop-filter:blur(4px);">
+    <div class="dark-glass rounded-3xl w-full max-w-sm p-6" onclick="event.stopPropagation()">
+     <div class="flex items-center justify-between mb-5">
+      <h3 class="text-lg font-bold" style="color: #fff;">Novo Hábito</h3><button onclick="closeModal('modal-create-habit')" class="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-700 transition"> <i data-lucide="x" style="width:16px;height:16px;color:#888;"></i> </button>
+     </div>
+     <form id="form-create-habit" onsubmit="return false;"><label for="habit-name" class="block text-xs font-semibold mb-2" style="color: #888;">Nome do Hábito</label> <input id="habit-name" type="text" class="w-full px-4 py-3 rounded-xl border border-gray-600 text-sm mb-4" style="background: #1a1a1a; color: #fff;" placeholder="Ex: Corrida matinal" required> <label for="habit-category" class="block text-xs font-semibold mb-2" style="color: #888;">Categoria</label> <select id="habit-category" class="w-full px-4 py-3 rounded-xl border border-gray-600 text-sm mb-4" style="background: #1a1a1a; color: #fff;" required> <option value="">Selecione uma categoria</option> <option value="saude">🏥 Saúde</option> <option value="exercicio">💪 Exercício</option> <option value="meditacao">🧘 Meditação</option> <option value="leitura">📚 Leitura</option> <option value="produtividade">⚙️ Produtividade</option> <option value="social">👥 Social</option> <option value="hobby">🎨 Hobby</option> </select> <label for="habit-frequency" class="block text-xs font-semibold mb-2" style="color: #888;">Frequência</label> <select id="habit-frequency" class="w-full px-4 py-3 rounded-xl border border-gray-600 text-sm mb-4" style="background: #1a1a1a; color: #fff;" required> <option value="">Selecione a frequência</option> <option value="diario">Diário</option> <option value="3x-semana">3x por semana</option> <option value="semanal">Semanal</option> <option value="outro">Outro</option> </select> <label for="habit-duration" class="block text-xs font-semibold mb-2" style="color: #888;">Duração (minutos)</label> <input id="habit-duration" type="number" class="w-full px-4 py-3 rounded-xl border border-gray-600 text-sm mb-5" style="background: #1a1a1a; color: #fff;" placeholder="30" min="1" required>
+      <div class="flex gap-3"><button type="button" onclick="closeModal('modal-create-habit')" class="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold dark-glass hover:bg-gray-800 transition" style="color: #fff;">Cancelar</button> <button type="button" id="btn-save-habit" onclick="saveHabit()" class="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold primary-blue text-white hover:shadow-lg hover:shadow-blue-500/50 transition">Criar</button>
+      </div>
+     </form>
+    </div>
+   </div><!-- SETTINGS MODAL -->
+   <div id="modal-settings" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display:none; background:rgba(0,0,0,0.7); backdrop-filter:blur(4px);">
+    <div class="dark-glass rounded-3xl w-full max-w-sm p-6 max-h-screen overflow-y-auto" onclick="event.stopPropagation()">
+     <div class="flex items-center justify-between mb-5">
+      <h3 class="text-lg font-bold" style="color: #fff;">Configurações</h3><button onclick="closeModal('modal-settings')" class="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-700 transition"> <i data-lucide="x" style="width:16px;height:16px;color:#888;"></i> </button>
+     </div>
+     <div class="space-y-6">
+      <div>
+       <h4 class="text-sm font-semibold mb-4" style="color: #fff;">Perfil</h4>
+       <div class="space-y-3">
+        <div><label for="settings-name" class="block text-xs font-semibold mb-2" style="color: #888;">Nome</label> <input id="settings-name" type="text" class="w-full px-4 py-3 rounded-xl border border-gray-600 text-sm" style="background: #1a1a1a; color: #fff;" placeholder="Seu nome">
+        </div>
+        <div><label for="settings-age" class="block text-xs font-semibold mb-2" style="color: #888;">Idade</label> <input id="settings-age" type="number" class="w-full px-4 py-3 rounded-xl border border-gray-600 text-sm" style="background: #1a1a1a; color: #fff;" placeholder="25" min="13">
+        </div>
+        <div><label for="settings-weight" class="block text-xs font-semibold mb-2" style="color: #888;">Peso (kg)</label> <input id="settings-weight" type="number" class="w-full px-4 py-3 rounded-xl border border-gray-600 text-sm" style="background: #1a1a1a; color: #fff;" placeholder="70" step="0.1" min="0">
+        </div>
+        <div><label for="settings-goal" class="block text-xs font-semibold mb-2" style="color: #888;">Objetivo</label> <select id="settings-goal" class="w-full px-4 py-3 rounded-xl border border-gray-600 text-sm" style="background: #1a1a1a; color: #fff;"> <option value="emagrecer">Emagrecer</option> <option value="ganhar-massa">Ganhar Massa Muscular</option> <option value="saude">Melhorar Saúde</option> <option value="resistencia">Aumentar Resistência</option> <option value="flexibilidade">Melhorar Flexibilidade</option> </select>
+        </div>
+       </div>
+      </div>
+      <div style="height: 1px; background: #333;"></div>
+      <div>
+       <h4 class="text-sm font-semibold mb-4" style="color: #fff;">Aplicativo</h4><button onclick="handleLogout()" class="w-full px-4 py-2.5 rounded-xl text-sm font-semibold border border-red-500 text-red-500 hover:bg-red-500/10 transition">Sair</button>
+      </div><button onclick="saveProfileSettings()" class="w-full px-4 py-2.5 rounded-xl text-sm font-semibold primary-blue text-white hover:shadow-lg hover:shadow-blue-500/50 transition">Salvar</button>
+     </div>
+    </div>
+   </div><!-- TOAST -->
+   <div id="toast-container" class="fixed bottom-4 right-4 z-50 pointer-events-none max-w-xs"></div>
+  </div>
+  <script>
+    // ========= TRANSLATIONS =========
+    const translations = {
+      pt: {
+        greeting: 'Bom dia! ',
+        greeting_desc: 'Vamos alcançar seus objetivos hoje?',
+        habits_title: 'Seus Hábitos',
+        recommendations_title: 'Recomendações para Você',
+        progress_title: 'Seu Progresso'
+      },
+      en: {
+        greeting: 'Good morning! ',
+        greeting_desc: 'Let\'s reach your goals today?',
+        habits_title: 'Your Habits',
+        recommendations_title: 'Recommendations for You',
+        progress_title: 'Your Progress'
+      },
+      es: {
+        greeting: '¡Buenos días! ',
+        greeting_desc: '¿Vamos a alcanzar tus objetivos hoy?',
+        habits_title: 'Tus Hábitos',
+        recommendations_title: 'Recomendaciones para Ti',
+        progress_title: 'Tu Progreso'
+      }
+    };
+
+    let currentLanguage = localStorage.getItem('language') || 'pt';
+    let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+    let allHabits = [];
+    let allUsers = JSON.parse(localStorage.getItem('allUsers')) || [];
+
+    // ========= INIT =========
+    const dataHandler = {
+      onDataChanged(data) {
+        allHabits = (data || []).filter(h => h.user_email === currentUser?.email && h.habit_name);
+        updateMetrics();
+        renderHabitsGrid();
+        renderProgressList();
+        loadRecommendations();
+      }
+    };
+
+    (async () => {
+      const result = await window.dataSdk.init(dataHandler);
+      if (!result.isOk) console.error('SDK init failed');
+      
+      document.getElementById('language-select').value = currentLanguage;
+      
+      if (currentUser) {
+        showApp();
+        loadUserProfile();
+      } else {
+        showLogin();
+      }
+      
+      updateUIText(currentLanguage);
+    })();
+
+    // ========= UI TEXT =========
+    function updateUIText(lang) {
+      const t = translations[lang];
+      document.getElementById('greeting-text').textContent = t.greeting;
+      document.getElementById('habits-title').textContent = t.habits_title;
+      document.getElementById('recommendations-title').textContent = t.recommendations_title;
+      document.getElementById('progress-title').textContent = t.progress_title;
+    }
+
+    function changeLanguage(lang) {
+      currentLanguage = lang;
+      localStorage.setItem('language', lang);
+      updateUIText(lang);
+    }
+
+    // ========= LOGIN =========
+    function switchLoginMode(mode) {
+      const loginForm = document.getElementById('form-login');
+      const regForm = document.getElementById('form-register');
+      const loginBtn = document.getElementById('btn-login-mode');
+      const regBtn = document.getElementById('btn-register-mode');
+
+      if (mode === 'login') {
+        loginForm.style.display = 'block';
+        regForm.style.display = 'none';
+        loginBtn.style.background = 'linear-gradient(135deg, #2D6AFA 0%, #1E4DC4 100%)';
+        loginBtn.style.color = '#fff';
+        regBtn.style.background = '';
+        regBtn.style.color = '#888';
+      } else {
+        loginForm.style.display = 'none';
+        regForm.style.display = 'block';
+        loginBtn.style.background = '';
+        loginBtn.style.color = '#888';
+        regBtn.style.background = 'linear-gradient(135deg, #2D6AFA 0%, #1E4DC4 100%)';
+        regBtn.style.color = '#fff';
+      }
+    }
+
+    function handleLogin() {
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value.trim();
+
+      if (!email || !password) {
+        showToast('Preencha todos os campos!', true);
+        return;
+      }
+
+      const user = allUsers.find(u => u.email === email && u.password === password);
+      if (user) {
+        currentUser = user;
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        showApp();
+        loadUserProfile();
+      } else {
+        showToast('Email ou senha incorretos!', true);
+      }
+    }
+
+    function handleRegister() {
+      const name = document.getElementById('register-name').value.trim();
+      const email = document.getElementById('register-email').value.trim();
+      const password = document.getElementById('register-password').value.trim();
+      const age = parseInt(document.getElementById('register-age').value);
+      const goal = document.getElementById('register-goal').value;
+
+      if (!name || !email || !password || !age || !goal) {
+        showToast('Preencha todos os campos!', true);
+        return;
+      }
+
+      if (allUsers.find(u => u.email === email)) {
+        showToast('Email já registrado!', true);
+        return;
+      }
+
+      const newUser = { name, email, password, age, goal, weight: null, height: null };
+      allUsers.push(newUser);
+      localStorage.setItem('allUsers', JSON.stringify(allUsers));
+
+      currentUser = newUser;
+      localStorage.setItem('currentUser', JSON.stringify(newUser));
+      
+      document.getElementById('form-login').reset();
+      document.getElementById('form-register').reset();
+      
+      showApp();
+      loadUserProfile();
+      showToast('Conta criada com sucesso! 🎉');
+    }
+
+    function handleLogout() {
+      currentUser = null;
+      localStorage.removeItem('currentUser');
+      allHabits = [];
+      
+      document.getElementById('form-login').reset();
+      document.getElementById('form-register').reset();
+      document.getElementById('login-email').value = '';
+      document.getElementById('login-password').value = '';
+      
+      switchLoginMode('login');
+      showLogin();
+      showToast('Desconectado com sucesso!');
+    }
+
+    // ========= SCREENS =========
+    function showLogin() {
+      document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('app-root').style.display = 'none';
+    }
+
+    function showApp() {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app-root').style.display = 'flex';
+      lucide.createIcons();
+    }
+
+    // ========= HABITS =========
+    function openCreateHabit() {
+      document.getElementById('modal-create-habit').style.display = 'flex';
+      document.getElementById('habit-name').focus();
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).style.display = 'none';
+    }
+
+    async function saveHabit() {
+      const name = document.getElementById('habit-name').value.trim();
+      const category = document.getElementById('habit-category').value;
+      const frequency = document.getElementById('habit-frequency').value;
+      const duration = parseInt(document.getElementById('habit-duration').value) || 0;
+
+      if (!name || !category || !frequency || duration <= 0) {
+        showToast('Preencha todos os campos!', true);
+        return;
+      }
+
+      if (allHabits.length >= 999) {
+        showToast('Limite de 999 hábitos atingido!', true);
+        return;
+      }
+
+      const btn = document.getElementById('btn-save-habit');
+      btn.disabled = true;
+      btn.textContent = 'Criando...';
+
+      const result = await window.dataSdk.create({
+        habit_name: name,
+        category: category,
+        frequency: frequency,
+        duration: duration,
+        completed: false,
+        created_at: new Date().toISOString(),
+        user_email: currentUser.email
+      });
+
+      btn.disabled = false;
+      btn.textContent = 'Criar';
+
+      if (result.isOk) {
+        closeModal('modal-create-habit');
+        document.getElementById('form-create-habit').reset();
+        showToast('Hábito criado! 🎉');
+      } else {
+        showToast('Erro ao criar hábito', true);
+      }
+    }
+
+    async function toggleHabitCompleted(backendId) {
+      const habit = allHabits.find(h => h.__backendId === backendId);
+      if (!habit) return;
+
+      const result = await window.dataSdk.update({
+        ...habit,
+        completed: !habit.completed
+      });
+
+      if (!result.isOk) {
+        showToast('Erro ao atualizar', true);
+      }
+    }
+
+    async function deleteHabit(backendId) {
+      const habit = allHabits.find(h => h.__backendId === backendId);
+      if (!habit) return;
+
+      const result = await window.dataSdk.delete(habit);
+      if (result.isOk) {
+        showToast('Hábito removido');
+      } else {
+        showToast('Erro ao remover', true);
+      }
+    }
+
+    // ========= METRICS =========
+    function updateMetrics() {
+      const total = allHabits.length;
+      const active = allHabits.filter(h => !h.completed).length;
+      const completed = allHabits.filter(h => h.completed).length;
+
+      document.getElementById('stat-total').textContent = total;
+      document.getElementById('stat-active').textContent = active;
+      document.getElementById('stat-completed').textContent = completed;
+    }
+
+    // ========= RENDER =========
+    function renderHabitsGrid() {
+      const container = document.getElementById('habits-grid');
+
+      if (allHabits.length === 0) {
+        container.innerHTML = '<div class="dark-glass rounded-2xl p-6 text-center col-span-full"><i data-lucide="inbox" style="width:32px;height:32px; margin: 0 auto 8px;" class="opacity-40"></i><p class="text-sm" style="color: #888;">Nenhum hábito criado ainda</p><p class="text-xs mt-2" style="color: #666;">Clique em "Novo Hábito" para começar</p></div>';
+        lucide.createIcons();
+        return;
+      }
+
+      const icons = { saude: '', exercicio: '', meditacao: '', leitura: '', produtividade: '', social: '', hobby: '' };
+      const existingMap = new Map([...container.children].map(el => [el.dataset.habitId, el]));
+
+      allHabits.forEach((habit) => {
+        const id = habit.__backendId;
+        const icon = icons[habit.category] || '';
+
+        if (existingMap.has(id)) {
+          const el = existingMap.get(id);
+          el.className = `dark-glass rounded-2xl p-5 cursor-pointer transition group ${habit.completed ? 'opacity-60' : ''}`;
+          el.innerHTML = `
+            <div class="flex items-start justify-between mb-3">
+              <div class="text-3xl">${icon}</div>
+              <button onclick="deleteHabit('${id}')" class="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-red-500/20 transition opacity-0 group-hover:opacity-100">
+                <i data-lucide="trash-2" style="width:14px;height:14px;color:#FF6B6B;"></i>
+              </button>
+            </div>
+            <h3 class="font-semibold mb-1 line-clamp-2" style="color: #fff;">${habit.habit_name}</h3>
+            <div class="text-xs mb-3" style="color: #888;">
+              <div>⏱️ ${habit.duration}min • ${habit.frequency}</div>
+            </div>
+            <button onclick="toggleHabitCompleted('${id}')" class="w-full px-3 py-2 rounded-lg text-xs font-semibold transition ${habit.completed ? 'bg-green-500/20 text-green-400' : 'dark-glass hover:bg-gray-700 text-gray-300'}">
+              ${habit.completed ? '✓ Completado' : 'Marcar completo'}
+            </button>
+          `;
+          existingMap.delete(id);
+        } else {
+          const card = document.createElement('div');
+          card.className = `dark-glass rounded-2xl p-5 cursor-pointer transition group ${habit.completed ? 'opacity-60' : ''}`;
+          card.dataset.habitId = id;
+          card.innerHTML = `
+            <div class="flex items-start justify-between mb-3">
+              <div class="text-3xl">${icon}</div>
+              <button onclick="deleteHabit('${id}')" class="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-red-500/20 transition opacity-0 group-hover:opacity-100">
+                <i data-lucide="trash-2" style="width:14px;height:14px;color:#FF6B6B;"></i>
+              </button>
+            </div>
+            <h3 class="font-semibold mb-1 line-clamp-2" style="color: #fff;">${habit.habit_name}</h3>
+            <div class="text-xs mb-3" style="color: #888;">
+              <div>⏱️ ${habit.duration}min • ${habit.frequency}</div>
+            </div>
+            <button onclick="toggleHabitCompleted('${id}')" class="w-full px-3 py-2 rounded-lg text-xs font-semibold transition ${habit.completed ? 'bg-green-500/20 text-green-400' : 'dark-glass hover:bg-gray-700 text-gray-300'}">
+              ${habit.completed ? '✓ Completado' : 'Marcar completo'}
+            </button>
+          `;
+          container.appendChild(card);
+        }
+      });
+
+      existingMap.forEach(el => el.remove());
+      lucide.createIcons();
+    }
+
+    // ========= RECOMMENDATIONS =========
+    const habitRecommendations = {
+      emagrecer: ['Corrida', 'Caminhada', 'Natação', 'Yoga', 'Pilates', 'Dança', 'Ciclismo'],
+      'ganhar-massa': ['Musculação', 'Levantamento de Peso', 'Treinamento com Pesos', 'Boxe'],
+      saude: ['Meditação', 'Yoga', 'Alongamento', 'Tai Chi', 'Pilates'],
+      resistencia: ['Corrida longa', 'Natação', 'Ciclismo', 'Remo', 'Escalada'],
+      flexibilidade: ['Yoga avançado', 'Pilates', 'Alongamento profundo', 'Tai Chi']
+    };
+
+    function loadRecommendations() {
+      if (!currentUser || !currentUser.goal || allHabits.length === 0) return;
+
+      const recommendations = habitRecommendations[currentUser.goal] || [];
+      const userHabitNames = allHabits.map(h => h.habit_name.toLowerCase());
+
+      const suggested = recommendations.filter(rec =>
+        !userHabitNames.some(name => name.includes(rec.toLowerCase()) || rec.toLowerCase().includes(name))
+      ).slice(0, 3);
+
+      const container = document.getElementById('recommendations-container');
+      if (suggested.length === 0) {
+        container.innerHTML = '<div class="dark-glass rounded-2xl p-6 text-center col-span-full"><i data-lucide="check-circle" style="width:32px;height:32px; margin: 0 auto 8px; color:#2D6AFA;"></i><p class="text-sm" style="color: #888;">Você está indo bem!</p><p class="text-xs mt-2" style="color: #666;">Continue com seus hábitos atuais</p></div>';
+      } else {
+        container.innerHTML = suggested.map(activity => `
+          <div class="dark-glass rounded-2xl p-5 cursor-pointer hover:border-blue-500 border border-gray-700 transition group" onclick="addFromRecommendation('${activity}')">
+            <i data-lucide="lightbulb" style="width:24px;height:24px;color:#FFD93D; margin-bottom:8px;"></i>
+            <h3 class="font-semibold mb-1" style="color: #fff;">${activity}</h3>
+            <p class="text-xs" style="color: #888;">Recomendado para seu objetivo</p>
+            <button class="w-full px-3 py-2 rounded-lg text-xs font-semibold mt-3 primary-blue text-white hover:shadow-lg transition opacity-0 group-hover:opacity-100">Adicionar</button>
+          </div>
+        `).join('');
+      }
+      lucide.createIcons();
+    }
+
+    function addFromRecommendation(habitName) {
+      document.getElementById('habit-name').value = habitName;
+      document.getElementById('habit-category').value = 'exercicio';
+      document.getElementById('habit-frequency').value = 'diario';
+      document.getElementById('habit-duration').value = '30';
+      openCreateHabit();
+    }
+
+    // ========= PROGRESS =========
+    function renderProgressList() {
+      const container = document.getElementById('progress-list');
+
+      if (allHabits.length === 0) {
+        container.innerHTML = '<div class="dark-glass rounded-2xl p-4 text-center"><i data-lucide="inbox" style="width:32px;height:32px; margin: 0 auto 8px;" class="opacity-40"></i><p class="text-sm" style="color: #888;">Nenhum registro ainda</p><p class="text-xs mt-1" style="color: #666;">Marque seus hábitos como completados</p></div>';
+        lucide.createIcons();
+        return;
+      }
+
+      const icons = { saude: '🏥', exercicio: '💪', meditacao: '🧘', leitura: '📚', produtividade: '⚙️', social: '👥', hobby: '🎨' };
+      const sorted = [...allHabits].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      const existingMap = new Map([...container.children].map(el => [el.dataset.progressId, el]));
+
+      sorted.forEach((habit) => {
+        const id = habit.__backendId;
+        const date = new Date(habit.created_at);
+        const dateStr = date.toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' });
+        const icon = icons[habit.category] || '⭐';
+
+        if (existingMap.has(id)) {
+          const el = existingMap.get(id);
+          el.innerHTML = `
+            <div class="flex-1 flex items-center gap-3">
+              <div class="text-xl">${icon}</div>
+              <div class="flex-1">
+                <div class="text-sm font-semibold" style="color: #fff;">${habit.habit_name}</div>
+                <div class="text-xs mt-1" style="color: #888;">
+                  <span>${habit.frequency} • ${habit.duration}min • ${dateStr}</span>
+                </div>
+              </div>
+            </div>
+            <button onclick="toggleHabitCompleted('${id}')" class="px-3 py-1 rounded-lg text-xs font-semibold transition ${habit.completed ? 'bg-green-500/20 text-green-400' : 'dark-glass hover:bg-gray-700 text-gray-300'}">
+              ${habit.completed ? '✓' : 'Completar'}
+            </button>
+          `;
+          existingMap.delete(id);
+        } else {
+          const row = document.createElement('div');
+          row.className = 'dark-glass rounded-2xl p-4 flex items-center justify-between group';
+          row.dataset.progressId = id;
+          row.innerHTML = `
+            <div class="flex-1 flex items-center gap-3">
+              <div class="text-xl">${icon}</div>
+              <div class="flex-1">
+                <div class="text-sm font-semibold" style="color: #fff;">${habit.habit_name}</div>
+                <div class="text-xs mt-1" style="color: #888;">
+                  <span>${habit.frequency} • ${habit.duration}min • ${dateStr}</span>
+                </div>
+              </div>
+            </div>
+            <button onclick="toggleHabitCompleted('${id}')" class="px-3 py-1 rounded-lg text-xs font-semibold transition ${habit.completed ? 'bg-green-500/20 text-green-400' : 'dark-glass hover:bg-gray-700 text-gray-300'}">
+              ${habit.completed ? '✓' : 'Completar'}
+            </button>
+          `;
+          container.appendChild(row);
+        }
+      });
+
+      existingMap.forEach(el => el.remove());
+      lucide.createIcons();
+    }
+
+    // ========= SETTINGS =========
+    function openSettings() {
+      loadUserProfile();
+      document.getElementById('modal-settings').style.display = 'flex';
+    }
+
+    function loadUserProfile() {
+      if (currentUser) {
+        document.getElementById('settings-name').value = currentUser.name || '';
+        document.getElementById('settings-age').value = currentUser.age || '';
+        document.getElementById('settings-weight').value = currentUser.weight || '';
+        document.getElementById('settings-goal').value = currentUser.goal || '';
+      }
+    }
+
+    function saveProfileSettings() {
+      if (currentUser) {
+        currentUser.name = document.getElementById('settings-name').value;
+        currentUser.age = parseInt(document.getElementById('settings-age').value) || 0;
+        currentUser.weight = parseFloat(document.getElementById('settings-weight').value) || 0;
+        currentUser.goal = document.getElementById('settings-goal').value;
+
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        allUsers = allUsers.map(u => u.email === currentUser.email ? currentUser : u);
+        localStorage.setItem('allUsers', JSON.stringify(allUsers));
+
+        closeModal('modal-settings');
+        showToast('Perfil atualizado! ✅');
+      }
+    }
+
+    // ========= NAVIGATION =========
+    function switchTab(tab) {
+      const tabsBtn = {
+        habits: document.getElementById('tab-habits-btn'),
+        recommendations: document.getElementById('tab-recommendations-btn'),
+        progress: document.getElementById('tab-progress-btn')
+      };
+
+      Object.values(tabsBtn).forEach(btn => btn.style.color = '#888');
+      if (tabsBtn[tab]) tabsBtn[tab].style.color = '#2D6AFA';
+    }
+
+    // ========= TOAST =========
+    function showToast(msg, isError = false) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'toast-enter px-4 py-3 rounded-2xl text-sm font-medium shadow-lg mb-2 pointer-events-auto';
+      toast.style.background = isError ? '#FF6B6B' : '#2D6AFA';
+      toast.style.color = '#fff';
+      toast.textContent = msg;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.classList.replace('toast-enter', 'toast-exit');
+        setTimeout(() => toast.remove(), 300);
+      }, 2500);
+    }
+
+    // ========= MODALS =========
+    document.getElementById('modal-create-habit').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) closeModal('modal-create-habit');
+    });
+
+    document.getElementById('modal-settings').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) closeModal('modal-settings');
+    });
+
+    lucide.createIcons();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e1747094053f62c',t:'MTc3NDM3MjEwMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
